@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 12 Builder Types — Which Automation Archetype Is Your Business?</title>
+<meta name="description" content="A 2-minute quiz that reveals your business's automation archetype — and the exact next step to get your operations running themselves.">
+<style>
+  :root{
+    --ink:#141414; --paper:#f5f1e8; --accent:#c8102e; --muted:#6b6459;
+    --card:#fffdf8; --line:#d8d2c4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);color:var(--ink);line-height:1.5}
+  .sans{font-family:Arial,Helvetica,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px}
+  a{color:inherit}
+
+  /* NAV */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:2px solid var(--ink)}
+  nav .logo{font-weight:700;letter-spacing:.08em;font-size:1.1rem}
+  nav .links a{font-family:Arial,sans-serif;font-size:.8rem;text-decoration:none;margin-left:18px;text-transform:uppercase;letter-spacing:.06em}
+  nav .links a:hover{color:var(--accent)}
+
+  /* HERO */
+  header{text-align:center;padding:70px 20px 50px}
+  header .kicker{font-family:Arial,sans-serif;font-size:.85rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  header h1{font-size:clamp(2rem,6vw,4.2rem);line-height:1.05;letter-spacing:.02em;text-transform:uppercase;margin-bottom:22px}
+  header h1 .red{color:var(--accent)}
+  header p.sub{font-family:Arial,sans-serif;font-size:1.05rem;max-width:560px;margin:0 auto 30px;color:var(--muted)}
+  .btn{display:inline-block;background:var(--accent);color:#fff;font-family:Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;padding:16px 42px;font-size:1rem;border:none;cursor:pointer;transition:transform .1s ease,box-shadow .1s ease}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,0,0,.15)}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* TYPES GRID */
+  section.types{padding:40px 0 70px;text-align:center}
+  section.types h2{font-size:clamp(1.4rem,3.5vw,2.2rem);text-transform:uppercase;margin-bottom:8px}
+  section.types p{font-family:Arial,sans-serif;color:var(--muted);margin-bottom:34px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--ink)}
+  .grid .cell{background:var(--card);padding:26px 14px;text-align:center;transition:background .15s ease}
+  .grid .cell:hover{background:#fff}
+  .grid .cell .n{font-family:Arial,sans-serif;font-size:.75rem;color:var(--accent);letter-spacing:.2em;margin-bottom:8px}
+  .grid .cell h3{font-size:1rem;text-transform:uppercase;letter-spacing:.04em}
+
+  /* QUIZ */
+  #quiz{display:none;background:var(--card);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:60px 0}
+  #quiz .progress{height:6px;background:var(--line);max-width:560px;margin:0 auto 40px}
+  #quiz .progress .bar{height:100%;background:var(--accent);width:0%;transition:width .25s ease}
+  #quiz .qcard{max-width:560px;margin:0 auto;text-align:center}
+  #quiz .qnum{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px}
+  #quiz h2{font-size:clamp(1.3rem,3vw,1.9rem);margin-bottom:34px}
+  #quiz .opts{display:grid;gap:12px;text-align:left}
+  #quiz .opt{font-family:Arial,sans-serif;font-size:.95rem;background:#fff;border:2px solid var(--ink);padding:16px 18px;cursor:pointer;transition:all .12s ease}
+  #quiz .opt:hover{background:var(--ink);color:#fff}
+  #quiz .back{background:none;border:none;font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:26px;cursor:pointer;text-decoration:underline}
+
+  /* GATE */
+  #gate{display:none;background:var(--card);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:60px 0}
+  #gate .inner{max-width:480px;margin:0 auto;text-align:center}
+  #gate h2{font-size:clamp(1.3rem,3vw,1.8rem);margin-bottom:12px}
+  #gate p{font-family:Arial,sans-serif;color:var(--muted);margin-bottom:28px;font-size:.95rem}
+  #gate form{display:grid;gap:12px}
+  #gate input{font-family:Arial,sans-serif;font-size:1rem;padding:14px;border:2px solid var(--ink);background:#fff}
+  #gate .fine{font-family:Arial,sans-serif;font-size:.72rem;color:var(--muted);margin-top:14px}
+
+  /* RESULT */
+  #result{display:none;padding:70px 0;text-align:center}
+  #result .kicker{font-family:Arial,sans-serif;font-size:.8rem;letter-spacing:.25em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  #result h2{font-size:clamp(2rem,5vw,3.4rem);text-transform:uppercase;margin-bottom:6px}
+  #result h3{font-weight:400;font-style:italic;color:var(--muted);margin-bottom:30px;font-size:1.1rem}
+  #result .card{max-width:640px;margin:0 auto 40px;background:var(--card);border:2px solid var(--ink);padding:34px;text-align:left}
+  #result .card p{font-family:Arial,sans-serif;margin-bottom:16px;font-size:1rem}
+  #result .card strong{font-family:Arial,sans-serif}
+  #result .next{font-family:Arial,sans-serif;background:#fff;border:2px solid var(--accent);padding:16px 20px;margin-bottom:30px;color:var(--ink)}
+  #result .share{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted)}
+
+  footer{border-top:2px solid var(--ink);padding:28px 20px;text-align:center;font-family:Arial,sans-serif;font-size:.75rem;color:var(--muted)}
+  footer a{text-decoration:none;margin:0 10px;text-transform:uppercase;letter-spacing:.06em}
+
+  @media(max-width:600px){
+    nav .links a:not(.keep){display:none}
+    header{padding:50px 20px 36px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <div class="logo">12 BUILDER TYPES</div>
+  <div class="links">
+    <a href="#types" class="keep">The Types</a>
+    <a href="#" onclick="startQuiz();return false">Take The Test</a>
+  </div>
+</nav>
+
+<header>
+  <div class="kicker">A 2-Minute Assessment</div>
+  <h1>The 12 Builder Types:<br><span class="red">Find Your Business's</span> Automation Archetype</h1>
+  <p class="sub">Answer 12 quick questions and discover which of the 12 Builder Types your business is — plus the exact next step to get operations running on autopilot.</p>
+  <button class="btn" onclick="startQuiz()">Take The Test</button>
+</header>
+
+<section class="types wrap" id="types">
+  <h2>Which Archetype Is Your Business?</h2>
+  <p>Every business falls into one of 12 patterns. Knowing yours tells you exactly what to fix first.</p>
+  <div class="grid" id="typesGrid"></div>
+</section>
+
+<div id="quiz">
+  <div class="wrap">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="qcard">
+      <div class="qnum" id="qnum"></div>
+      <h2 id="qtext"></h2>
+      <div class="opts" id="opts"></div>
+      <button class="back" id="backBtn" onclick="goBack()" style="display:none">&larr; Previous question</button>
+    </div>
+  </div>
+</div>
+
+<div id="gate">
+  <div class="wrap">
+    <div class="inner">
+      <h2>Your Archetype Is Ready</h2>
+      <p>Enter your details to see your Builder Type, what it means, and your recommended next step.</p>
+      <form id="leadForm">
+        <input type="text" id="fname" placeholder="First name" required>
+        <input type="email" id="femail" placeholder="Email" required>
+        <button class="btn" type="submit" id="submitBtn">Reveal My Type</button>
+      </form>
+      <div class="fine">We'll send you your full results. No spam — just the systems stuff.</div>
+    </div>
+  </div>
+</div>
+
+<div id="result">
+  <div class="wrap">
+    <div class="kicker">Your Builder Type</div>
+    <h2 id="rName"></h2>
+    <h3 id="rTag"></h3>
+    <div class="card" id="rBody"></div>
+    <a class="btn" id="rCta" href="mailto:sebastianireton@gmail.com?subject=Free%20automation%20audit%20request">Book My Free Automation Audit</a>
+    <div class="share">Save your results — screenshot this page.</div>
+  </div>
+</div>
+
+<footer>
+  <div>© <span id="yr"></span> Automations &amp; Website Design</div>
+  <div style="margin-top:10px">
+    <a href="#" onclick="startQuiz();return false">Retake the test</a>
+    <a href="mailto:sebastianireton@gmail.com">Contact</a>
+    <a href="#" onclick="alert('Add your privacy policy link here.');return false">Privacy</a>
+  </div>
+</footer>
+
+<script>
+/* ================= DATA ================= */
+const ARCHETYPES = [
+  {id:"firefighter",  name:"The Firefighter",          tag:"Saving the business daily — one emergency at a time.",
+   body:"Your business runs on adrenaline. Every day is a new fire: the order didn't sync, the client's message got missed, the invoice is lost. You're not building a business — you're surviving inside one.",
+   next:"You don't need more hustle — you need done-for-you systems that catch the fires before they start. Start with ONE workflow you repeat daily and let us automate it end-to-end."},
+  {id:"juggler",      name:"The Spreadsheet Juggler",  tag:"Your business lives in 14 tabs and a prayer.",
+   body:"Sheets, docs, sticky notes, and half-remembered formulas hold your entire operation together. It works — until someone sorts the wrong column or the file lives on one laptop.",
+   next:"Your data deserves a real spine. We move your sheets into a connected system with a single source of truth, automated entries, and dashboards that update themselves."},
+  {id:"tinkerer",     name:"The Tinkerer",            tag:"You've built 20 automations. 6 work. 3 are load-bearing.",
+   body:"You love the tools. You've connected Zap A to Make B to GPT C. But half-finished flows and forgotten triggers mean your automation layer is now its own tech debt.",
+   next:"You need an audit and an architecture: consolidate the half-built flows into a documented, reliable system — then hand the maintenance off so you can tinker for fun, not survival."},
+  {id:"bottleneck",   name:"The Bottleneck CEO",      tag:"Every decision routes through you. That's the ceiling.",
+   body:"The business can't move faster than your inbox. Team members wait on your approvals, your answers, your availability. Growth would only deepen the queue.",
+   next:"The fix is delegation infrastructure: approval rules, decision dashboards, and AI-assisted triage that let 80% of decisions happen without you — with full visibility."},
+  {id:"ghosttown",    name:"The Ghost-Town Marketer",  tag:"You get traffic. It arrives, looks around, and leaves.",
+   body:"Ads run, the site looks fine, the socials post — but leads evaporate after first contact. There's no follow-up sequence, no nurture, no reason for them to come back.",
+   next:"You don't need more traffic, you need a funnel: lead capture, automated follow-up sequences, and retargeting that warms visitors into buyers while you sleep."},
+  {id:"overbooked",   name:"The Overbooked Operator", tag:"Demand isn't the problem. Capacity is.",
+   body:"Clients keep coming but intake, scheduling, and onboarding are manual. Each new client costs you a week of admin, and the quality slips as you stretch.",
+   next:"Automate the front door: booking, intake forms, contracts, and onboarding sequences that make new clients feel handled in minutes — not neglected for a week."},
+  {id:"perfectionist",name:"The Brand Perfectionist",  tag:"The brand is beautiful. Behind the curtain, it's duct tape.",
+   body:"Customers see polish. Internally it's manual everything: emails sent by hand, orders processed by memory, reports built overnight. The brand can't scale because the backend is invisible chaos.",
+   next:"Your brand deserves infrastructure that matches it. We build the operational layer — order flow, comms, reporting — so the polish is real all the way down."},
+  {id:"hoarder",      name:"The Data Hoarder",         tag:"You collect everything. You look at none of it.",
+   body:"Years of customer data, sales numbers, and analytics sit unexamined. Decisions get made on gut feel while the answers collect dust in exports nobody opens.",
+   next:"Automated reporting and insight pipelines: your data cleaned, connected, and turned into a weekly dashboard that tells you what to do next — without a single manual export."},
+  {id:"skeptic",      name:"The Tech Skeptic",         tag:"Burned by software before. Manual feels safer.",
+   body:"You tried a tool, it broke, support ghosted you, and the migration ate a month. Now everything stays manual — reliable, predictable, and permanently capped at your hours.",
+   next:"You need a low-risk pilot: one small automation with a clear before/after measurement. If it doesn't save you real hours in 30 days, you've lost nothing."},
+  {id:"scaler",       name:"The Scaling Startup",      tag:"Growth is breaking things faster than you can fix them.",
+   body:"Every month brings more customers, more headcount, more processes invented on the fly. What worked at 10 clients fails at 40. You're standardizing in the middle of a flood.",
+   next:"Process standardization plus integrations: we map your core flows, cut the duplicated steps, and connect your stack so the machine you're scaling actually holds together."},
+  {id:"legend",       name:"The Local Legend",         tag:"Your reputation is golden. Your digital presence is a rumor.",
+   body:"Word of mouth keeps you booked, but you're invisible online — no booking system, no follow-up, no way to catch the customers who search instead of ask.",
+   next:"A real web presence with automated booking, reviews, and follow-up: turn your offline reputation into a digital machine that books customers while you work."},
+  {id:"native",       name:"The Automation Native",    tag:"You're already automated. You want the frontier.",
+   body:"Your ops run themselves, your data flows, your funnels convert. You're here because you know the next edge is AI agents, proactive systems, and pipelines your competitors don't have yet.",
+   next:"Advanced builds: AI agents that handle triage and support, proactive monitoring, and revenue-operations automation that makes your business feel impossible to competitors."}
+];
+
+const QUESTIONS = [
+  {q:"It's Monday morning. What's the first thing on your plate?",
+   a:[["Firefighting — something broke over the weekend and clients noticed.","firefighter"],
+      ["Opening the 14 spreadsheets that run my week.","juggler"],
+      ["Checking the dashboards — I mostly look at exceptions, not everything.","native"],
+      ["Answering the messages that piled up because everything routes to me.","bottleneck"]]},
+  {q:"How do new customers find you?",
+   a:[["Honestly? Referrals and luck. I have a website but it just sits there.","legend"],
+      ["Ads and traffic — but most visitors leave without doing anything.","ghosttown"],
+      ["Inbound is strong. Too strong — I can't process the requests fast enough.","overbooked"],
+      ["My marketing system brings them in and follows up automatically.","native"]]},
+  {q:"Where does your business data live?",
+   a:[["In my head, my inbox, and a few sticky notes.","firefighter"],
+      ["Google Sheets — lots of them, cross-referenced by memory.","juggler"],
+      ["Everywhere: the CRM, the tool I tried last year, some exports...","hoarder"],
+      ["A clean connected stack — CRM, automations, one source of truth.","native"]]},
+  {q:"A lead fills out your contact form. Then what happens?",
+   a:[["I see it eventually. Depends when I check that inbox.","firefighter"],
+      ["They go into a sheet, and I follow up when I carve out time.","juggler"],
+      ["Nothing automatic — I need to personally respond or they go cold.","ghosttown"],
+      ["Automatic sequence: instant reply, nurture emails, booking link, reminders.","native"]]},
+  {q:"What's your relationship with automation tools like Zapier or Make?",
+   a:[["Haven't touched them. I do everything by hand — it's what I trust.","skeptic"],
+      ["I've built some. Some work. Some I'm scared to look at.","tinkerer"],
+      ["We use them everywhere — I'm interested in what's beyond them.","native"],
+      ["Tried once, it broke, wasted a month. Not doing that again.","skeptic"]]},
+  {q:"Your team (or your solo operation) is drowning. What's the bottleneck?",
+   a:[["There's no system — every task is improvised, every day.","firefighter"],
+      ["Me. Everything waits for my approval or my answer.","bottleneck"],
+      ["Onboarding. Each new client costs a week of manual admin.","overbooked"],
+      ["Nothing documented — I'm the only one who knows how things work.","bottleneck"]]},
+  {q:"How do you decide what to charge, stock, or prioritize next?",
+   a:[["Gut feel. The data exists somewhere but I never look.","hoarder"],
+      ["I check a dashboard — reporting builds itself.","native"],
+      ["I have the numbers, but pulling them takes an hour I don't have.","juggler"],
+      ["Decisions stack up until I make a marathon day of them.","bottleneck"]]},
+  {q:"Growth is picking up. What breaks first?",
+   a:[["Me — more customers means more manual everything.","overbooked"],
+      ["Quality — I can't keep doing everything at the standard I set.","perfectionist"],
+      ["Processes — the informal way we did things stops working at scale.","scaler"],
+      ["The tools I built myself start glitching under the volume.","tinkerer"]]},
+  {q:"What does 'behind the scenes' of your business look like?",
+   a:[["Beautiful brand out front, duct tape and manual labor behind it.","perfectionist"],
+      ["An impressive graveyard of apps I tried and abandoned.","skeptic"],
+      ["A lab of experiments — half deployed, half forgotten.","tinkerer"],
+      ["Honestly? Paper, phone calls, and memory. It works locally.","legend"]]},
+  {q:"A customer leaves a bad review. What's your move?",
+   a:[["Rush to respond personally — reputation is everything here.","legend"],
+      ["Try to get ahead of it — but I only see reviews when someone tells me.","perfectionist"],
+      ["There's no system for that. Another thing I've been meaning to set up.","juggler"],
+      ["Too late — by the time I respond, the damage circulates for weeks.","ghosttown"]]},
+  {q:"Where do you want to be in 12 months?",
+   a:[["Out of survival mode — systems that work without me.","firefighter"],
+      ["Scaled past myself — the business running, me steering.","scaler"],
+      ["The best-looking operation in my market, inside and out.","perfectionist"],
+      ["Ahead of everyone — using AI my competitors haven't even heard of.","native"]]},
+  {q:"What's your honest biggest frustration right now?",
+   a:[["I'm the ceiling. Nothing moves unless I touch it.","bottleneck"],
+      ["I know the answers are in my data, I just never get to it.","hoarder"],
+      ["We grew so fast the wheels are coming off the wagon.","scaler"],
+      ["I'm paying for ads that just... vanish into nothing.","ghosttown"]]}
+];
+
+/* ponytail: stable-max scoring — first archetype in declaration order wins ties.
+   Upgrade path: weight questions or score secondary archetypes when segmentation quality matters. */
+const LEADS_ENDPOINT = "api/leads";
+let answers = [], qIndex = 0, resultArchetype = null, lead = {name:"", email:""};
+
+function $(id){return document.getElementById(id)}
+
+function startQuiz(){
+  answers=[]; qIndex=0; resultArchetype=null;
+  ["types","quiz","gate","result"].forEach(id=>$(id).style.display="none");
+  $("quiz").style.display="block";
+  renderQuestion();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderQuestion(){
+  const q=QUESTIONS[qIndex];
+  $("qnum").textContent="Question "+(qIndex+1)+" of "+QUESTIONS.length;
+  $("qtext").textContent=q.q;
+  $("bar").style.width=(qIndex/QUESTIONS.length*100)+"%";
+  const opts=$("opts"); opts.innerHTML="";
+  q.a.forEach(([text,id])=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.textContent=text;
+    b.onclick=()=>{answers[qIndex]=id; qIndex++;
+      if(qIndex<QUESTIONS.length){renderQuestion()}else{finishQuiz()}};
+    opts.appendChild(b);
+  });
+  $("backBtn").style.display=qIndex>0?"block":"none";
+}
+
+function goBack(){ if(qIndex>0){qIndex--; renderQuestion()} }
+
+function finishQuiz(){
+  const scores={};
+  answers.forEach(id=>scores[id]=(scores[id]||0)+1);
+  resultArchetype=ARCHETYPES.find(a=>a.id===Object.keys(scores).sort((x,y)=>scores[y]-scores[x])[0]);
+  $("quiz").style.display="none";
+  $("bar").style.width="100%";
+  $("gate").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+$("leadForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const btn=$("submitBtn"); btn.disabled=true; btn.textContent="Revealing...";
+  lead={name:$("fname").value.trim(), email:$("femail").value.trim()};
+  try{
+    await fetch(LEADS_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:lead.name,email:lead.email,archetype:resultArchetype.id,
+        archetypeName:resultArchetype.name, answers, at:new Date().toISOString()})});
+  }catch(err){
+    /* ponytail: reveal anyway — a broken endpoint shouldn't dead-end the funnel.
+       Leads from failed posts can be recovered from Vercel function logs or the webhook. */
+    console.warn("lead post failed (results still shown):",err);
+  }
+  showResult();
+});
+
+function showResult(){
+  $("gate").style.display="none";
+  $("result").style.display="block";
+  $("rName").textContent=resultArchetype.name;
+  $("rTag").textContent=resultArchetype.tag;
+  $("rBody").innerHTML="<p>"+resultArchetype.body+"</p><p><strong>Your next step:</strong> "+resultArchetype.next+"</p>";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* populate types grid */
+(function(){
+  const g=$("typesGrid");
+  ARCHETYPES.forEach((a,i)=>{
+    const d=document.createElement("div"); d.className="cell";
+    d.innerHTML='<div class="n">TYPE '+(i+1)+'</div><h3>'+a.name.replace("The ","")+"</h3>";
+    d.onclick=startQuiz; d.style.cursor="pointer";
+    g.appendChild(d);
+  });
+  $("yr").textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
