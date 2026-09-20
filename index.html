@@ -73,6 +73,11 @@
   #result .card strong{font-family:Arial,sans-serif}
   #result .next{font-family:Arial,sans-serif;background:#fff;border:2px solid var(--accent);padding:16px 20px;margin-bottom:30px;color:var(--ink)}
   #result .share{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted)}
+  #result .bd{margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
+  #result .bd h4{font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;margin-bottom:12px}
+  .srow{display:grid;grid-template-columns:170px 1fr 44px;gap:10px;align-items:center;font-family:Arial,sans-serif;font-size:.8rem;margin-bottom:8px}
+  .sbar{background:var(--line);height:10px}
+  .sbar div{background:var(--accent);height:10px}
 
   footer{border-top:2px solid var(--ink);padding:28px 20px;text-align:center;font-family:Arial,sans-serif;font-size:.75rem;color:var(--muted)}
   footer a{text-decoration:none;margin:0 10px;text-transform:uppercase;letter-spacing:.06em}
@@ -257,15 +262,39 @@ const QUESTIONS = [
       ["I'm paying for ads that just... vanish into nothing.","ghosttown"]]}
 ];
 
-/* ponytail: stable-max scoring — first archetype in declaration order wins ties.
-   Upgrade path: weight questions or score secondary archetypes when segmentation quality matters. */
-const LEADS_ENDPOINT = "api/leads";
-let answers = [], qIndex = 0, resultArchetype = null, lead = {name:"", email:""};
+let answers = [], qIndex = 0, resultArchetype = null, resultScores = {}, lead = {name:"", email:""};
+
+/* ================= TRACKING ================= */
+const ENDPOINT = "api/collect";
+const SESSION_ID = (crypto.randomUUID?crypto.randomUUID():String(Date.now()))+"-"+Math.random().toString(36).slice(2,8);
+const SESSION_START = Date.now();
+const utm = {}; new URLSearchParams(location.search).forEach((v,k)=>{if(k.startsWith("utm_"))utm[k]=v;});
+let qShownAt = Date.now();
+
+function track(type, data={}){                    // fire-and-forget events
+  const payload = {type, sessionId: SESSION_ID, data:{...data, utm, path: location.pathname}};
+  const body = JSON.stringify(payload);
+  if(!navigator.sendBeacon || !navigator.sendBeacon(ENDPOINT, new Blob([body],{type:"application/json"})))
+    fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body}).catch(()=>{});
+}
+async function trackLead(data){                   // the money event — fetch, beacon fallback
+  const payload = {type:"lead", sessionId: SESSION_ID, data:{...data, utm, path: location.pathname}};
+  try{ await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}); }
+  catch(err){ console.warn("lead post failed (results still shown):",err);
+    try{ navigator.sendBeacon(ENDPOINT, new Blob([JSON.stringify(payload)],{type:"application/json"})); }catch(e){} }
+}
+
+track("pageview", {referrer: document.referrer||null, screen: screen.width+"x"+screen.height});
+document.addEventListener("visibilitychange", ()=>{   // ponytail: drop-off = tab hidden mid-quiz; swap for server-side session gaps if exit-rate precision matters
+  if(document.visibilityState==="hidden" && document.getElementById("quiz").style.display==="block")
+    track("quiz_dropoff", {atQuestion: qIndex+1, elapsedMs: Date.now()-SESSION_START});
+});
 
 function $(id){return document.getElementById(id)}
 
 function startQuiz(){
   answers=[]; qIndex=0; resultArchetype=null;
+  track("quiz_start", {});
   ["types","quiz","gate","result"].forEach(id=>$(id).style.display="none");
   $("quiz").style.display="block";
   renderQuestion();
@@ -273,6 +302,7 @@ function startQuiz(){
 }
 
 function renderQuestion(){
+  qShownAt=Date.now();
   const q=QUESTIONS[qIndex];
   $("qnum").textContent="Question "+(qIndex+1)+" of "+QUESTIONS.length;
   $("qtext").textContent=q.q;
@@ -281,7 +311,9 @@ function renderQuestion(){
   q.a.forEach(([text,id])=>{
     const b=document.createElement("button");
     b.className="opt"; b.textContent=text;
-    b.onclick=()=>{answers[qIndex]=id; qIndex++;
+    b.onclick=()=>{answers[qIndex]=id;
+      track("question_answered",{q:qIndex+1, archetype:id, ms:Date.now()-qShownAt});
+      qIndex++;
       if(qIndex<QUESTIONS.length){renderQuestion()}else{finishQuiz()}};
     opts.appendChild(b);
   });
@@ -293,7 +325,10 @@ function goBack(){ if(qIndex>0){qIndex--; renderQuestion()} }
 function finishQuiz(){
   const scores={};
   answers.forEach(id=>scores[id]=(scores[id]||0)+1);
-  resultArchetype=ARCHETYPES.find(a=>a.id===Object.keys(scores).sort((x,y)=>scores[y]-scores[x])[0]);
+  resultScores=scores;
+  const top=Object.keys(scores).sort((x,y)=>scores[y]-scores[x])[0];
+  resultArchetype=ARCHETYPES.find(a=>a.id===top);
+  track("quiz_completed",{top, scores, totalMs:Date.now()-SESSION_START});
   $("quiz").style.display="none";
   $("bar").style.width="100%";
   $("gate").style.display="block";
@@ -304,15 +339,10 @@ $("leadForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const btn=$("submitBtn"); btn.disabled=true; btn.textContent="Revealing...";
   lead={name:$("fname").value.trim(), email:$("femail").value.trim()};
-  try{
-    await fetch(LEADS_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({name:lead.name,email:lead.email,archetype:resultArchetype.id,
-        archetypeName:resultArchetype.name, answers, at:new Date().toISOString()})});
-  }catch(err){
-    /* ponytail: reveal anyway — a broken endpoint shouldn't dead-end the funnel.
-       Leads from failed posts can be recovered from Vercel function logs or the webhook. */
-    console.warn("lead post failed (results still shown):",err);
-  }
+  /* ponytail: reveal anyway on failure — a broken endpoint never dead-ends the funnel. */
+  await trackLead({name:lead.name, email:lead.email, archetype:resultArchetype.id,
+    archetypeName:resultArchetype.name, tagline:resultArchetype.tag,
+    answers, scores:resultScores, totalMs:Date.now()-SESSION_START});
   showResult();
 });
 
@@ -321,7 +351,15 @@ function showResult(){
   $("result").style.display="block";
   $("rName").textContent=resultArchetype.name;
   $("rTag").textContent=resultArchetype.tag;
-  $("rBody").innerHTML="<p>"+resultArchetype.body+"</p><p><strong>Your next step:</strong> "+resultArchetype.next+"</p>";
+  const top=Object.entries(resultScores).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const max=top[0][1];
+  const bars=top.map(([id,v])=>{
+    const n=(ARCHETYPES.find(a=>a.id===id)||{name:id}).name.replace("The ","");
+    return '<div class="srow"><span>'+n+'</span><div class="sbar"><div style="width:'+(v/max*100)+'%"></div></div><span>'+v+'/'+answers.length+'</span></div>';
+  }).join("");
+  $("rBody").innerHTML="<p>"+resultArchetype.body+"</p><p><strong>Your next step:</strong> "+resultArchetype.next
+    +'</p><div class="bd"><h4>Your breakdown</h4>'+bars+"</div>";
+  track("result_viewed",{archetype:resultArchetype.id});
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
