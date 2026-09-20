@@ -2,6 +2,9 @@
   "name": "automations-and-website-design",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node verify.mjs"
+  },
   "dependencies": {
     "@vercel/blob": "^1.0.0"
   }
